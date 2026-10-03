@@ -12,7 +12,7 @@
 | # | Decision | Outcome | Notes |
 |---|---|---|---|
 | 1 | **Name** | **Cha Dash** · domain `dash.cha.sh` | Slugs: `chadash` (hub), `chadash-node` (node). Docker labels: `chadash.*`. Env prefix: `CHADASH_*` |
-| 2 | **License** | **AGPL-3.0-or-later** for hub and node. Apache-2.0 for the spec schema, design tokens and icon pipeline | **Contribution terms (DCO or CLA) are still to be decided, before the first outside PR is merged.** That choice decides whether the license can be changed later (for example, a friendlier license for institutions) |
+| 2 | **License** | **AGPL-3.0-or-later** for hub and node; Apache-2.0 for the spec schema, design tokens and icon pipeline. **Contributions: an [OSI-limited CLA](../../CLA.md)** signed via the CLA Assistant bot | Contributors keep their copyright. We may relicense, but **only under OSI-approved licences**, which keeps the option of a friendlier licence for institutions or dual licensing. Contributions can never be distributed under proprietary terms |
 | 3 | **Frontend** | **Vue 3.6** (RC now, stable when released) + **latest Vite**, as a plain SPA embedded in the Go binary | Vapor mode opt-in per component, adopted only where measurements show a gain. See [03 · Architecture → Tech stack](03-architecture.md#tech-stack) |
 | 4 | **Dogfood** | The owner's homelab | See [05 · Dogfood home](05-dogfood-home.md). It sets the v0.1 integration list |
 | 5 | **How much "home" in v0.1** | Infrastructure first, plus the home integrations the owner actually uses: **Home Assistant, Frigate, media calendar, clock/weather**. The Family board ships in v0.2; feeds in v1.0 | — |
@@ -87,7 +87,7 @@ Compare it for one day against a gridstack 14 prototype.
 **Repo and process**
 - Skeleton, `deploy/compose.yaml`.
 - CI: lint, test, govulncheck, bundle budget.
-- Contribution-terms bot (DCO or CLA, per decision 2), CODEOWNERS, contributor guide v1.
+- ~~CLA bot~~ ✅ (CLA Assistant, pinned; signatures on the `cla-signatures` branch), CODEOWNERS, contributor guide v1.
 
 **Demo Home simulator v0**, seeded from the dogfood home's shape, with its real incidents scripted.
 
@@ -334,8 +334,10 @@ None right now. The remaining open items are the M0 decisions (12–17) above.
 
 ## Immediate next steps
 
-1. ~~**Repo bootstrap**~~ ✅ done 2026-10-03: `LICENSE` (AGPL-3.0), `SECURITY.md`, `CONTRIBUTING.md`, docs and fixture pushed to [ban-red/Cha-Dash](https://github.com/ban-red/Cha-Dash). Still to do: enable private vulnerability reporting, and decide contribution terms (decision 2).
-2. **Design exploration:** Direction A and B prototypes rendering the dogfood home with today's real incidents.
+> The detailed, sequenced plan for finishing M0 is in [06 · Next steps](06-next-steps.md).
+
+1. ~~**Repo bootstrap**~~ ✅ done 2026-10-03: `LICENSE` (AGPL-3.0), `SECURITY.md`, `CONTRIBUTING.md`, docs and fixture pushed to [ban-red/Cha-Dash](https://github.com/ban-red/Cha-Dash). OSI-limited CLA added. Still to do: enable private vulnerability reporting in repo settings.
+2. **Design exploration:** prototype v1 is built at [`design/prototypes/m0-directions.html`](../../design/prototypes/README.md), with both directions on the dogfood home. **Next: pick a direction (decision 12).**
 3. **Layout engine spike** (TS + Vue 3.6 + Motion for Vue), plus a one-day gridstack comparison.
 4. **Hub skeleton:**
    - `chadash serve`, setup token, SQLite, WebSocket snapshot/diff

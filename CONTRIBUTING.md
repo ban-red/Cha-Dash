@@ -10,7 +10,12 @@ Thanks for your interest! Cha Dash is in its **planning phase**: there's no appl
 
 ## Code contributions
 
-We'll start accepting code once the M0 foundations land (see [docs/plan/04-roadmap.md](docs/plan/04-roadmap.md)). The contribution terms will be published here before the first outside pull request is merged.
+We'll start accepting code once the M0 foundations land (see [docs/plan/04-roadmap.md](docs/plan/04-roadmap.md)).
+
+**Contributor License Agreement.** Before your first pull request can be merged, you sign our [CLA](CLA.md) by posting a one-line comment; the CLA Assistant bot will prompt you.
+- You keep your copyright.
+- Your contribution can only ever be released under **OSI-approved open-source licences**, never proprietary ones.
+- The CLA lets the project change licence in future (for example, to a more permissive licence for institutions) without tracking down every contributor.
 
 When code contributions open, expect a few house rules:
 
@@ -32,4 +37,4 @@ Please report vulnerabilities privately. See [SECURITY.md](SECURITY.md).
 
 ## License
 
-Cha Dash is licensed under the [GNU Affero General Public License v3.0 or later](LICENSE).
+Cha Dash is licensed under the [GNU Affero General Public License v3.0 or later](LICENSE). Contributions are accepted under the [CLA](CLA.md).

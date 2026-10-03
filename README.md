@@ -19,6 +19,10 @@ docker compose up -d   # the primary way to self-host Cha Dash (coming soon) —
 - [03 · Architecture](docs/plan/03-architecture.md) — the Home Graph, integrations, owned stacks, the node, compose deployment, security, stack
 - [04 · Roadmap, decisions & risks](docs/plan/04-roadmap.md) — milestones, decisions made and still open, risks
 - [05 · Dogfood home](docs/plan/05-dogfood-home.md) — the real homelab Cha Dash has to win over first
+- [06 · Next steps](docs/plan/06-next-steps.md) — the sequenced plan for finishing M0
+
+**Design**
+- [M0 prototypes](design/prototypes/README.md) — two visual directions rendering the dogfood home
 
 ## The Pact (draft)
 
@@ -33,5 +37,6 @@ docker compose up -d   # the primary way to self-host Cha Dash (coming soon) —
 ## Contributing, security & license
 
 - [CONTRIBUTING.md](CONTRIBUTING.md): how to help while Cha Dash is in planning
+- [CLA.md](CLA.md): you keep your copyright, and contributions can only ever be released under OSI-approved licences
 - [SECURITY.md](SECURITY.md): report vulnerabilities privately
 - Licensed under [AGPL-3.0-or-later](LICENSE)

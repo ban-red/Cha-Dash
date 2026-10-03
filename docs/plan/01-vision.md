@@ -116,7 +116,7 @@ These are tie-breakers when we disagree.
 
 These go in the README and are treated as product requirements.
 
-- **Open source (AGPL-3.0), built in the open.**
+- **Open source (AGPL-3.0), built in the open.** Contributions come in under an [OSI-limited CLA](../../CLA.md). Contributors keep their copyright, and their code can only ever be released under open-source licences.
 - **Your secrets never leave the server.** Credentials are encrypted at rest and redacted in exports and diagnostics.
 - **Read-only until you say otherwise.** Every control capability is an explicit, scoped opt-in.
 - **No cloud and no phoning home.** Telemetry is off unless you opt in. Fonts, icons and assets are bundled.
