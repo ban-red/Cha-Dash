@@ -28,7 +28,7 @@ A well-made instrument is calm while it works, precise when you read it, honest 
 1. **Quiet when healthy.** Neutral is the default state. Color is a signal, not decoration.
 2. **Numbers are first-class.** Tabular numerals in a dedicated face, values that roll on change, and every number carries its context (unit, normal band, trend, freshness).
 3. **Hairline structure.** 1px rules and precise alignment, like an engineering drawing. No heavy cards or drop shadows on content.
-4. **One signal color.** A single, ownable "needs you" color (working name **Ember**, a warm signal orange). It is never decorative.
+4. **One signal color.** A single, ownable "needs you" color (working name **Ember**). It's an **amber** (hue ≈ 75°), not orange: the M0 palette check showed orange and the "down" red were too close to tell apart (see the color section). It is never decorative.
 5. **Physical motion.** Everything moves on springs, can be interrupted, and comes from where it lives.
 6. **Honest data.** Freshness is always knowable, staleness is visible, and unknown is shown as "—", never as 0.
 
@@ -37,10 +37,12 @@ A well-made instrument is calm while it works, precise when you read it, honest 
 | Direction | Character | Risk |
 |---|---|---|
 | **A · Instrument** *(recommended north star)* | Warm graphite base, hairlines, tabular mono numerals, Ember signal, monochrome logos that turn colored on issue | Can feel austere. Needs warmth in the light theme. |
-| **B · Paper** | Light, editorial, typographic. Large confident numerals, generous whitespace, ink-like dark mode | Lower density; harder to make dark mode feel intentional |
+| **B · Paper** | Light, editorial, typographic: **literally a newspaper front page**. Masthead, a serif headline as the status sentence, grotesk figures, column rules instead of cards, photo captions on cameras, the fleet laid out like a market table | Lower density; harder to make dark mode feel intentional |
 | **C · Glass** | Depth, materials, vibrant backdrops | Looks like an iOS clone, has legibility problems, and is the anti-lesson of 2025 |
 
-The plan is to build A and B as static prototypes on the same demo data, then pick one or blend them (likely A's grammar with B's light theme). C stays as a reference only.
+**Prototype v1 is built:** [`design/prototypes/m0-directions.html`](../../design/prototypes/m0-directions.html) ([notes](../../design/prototypes/README.md)). It renders both directions on the dogfood home with today's real incidents, in light, dark and night themes, at desktop and phone sizes, plus a widget sheet showing sizes and states.
+
+The plan was to build A and B as static prototypes on the same demo data, then pick one or blend them (likely A's grammar with B's light theme). C stays as a reference only.
 
 ---
 
@@ -66,10 +68,23 @@ The plan is to build A and B as static prototypes on the same demo data, then pi
 | Healthy | none (or hairline ○ in lists) | neutral | "OK" | recedes |
 | Intentionally off | ○ hollow | neutral, dimmed | "Stopped (expected)" | quiet. **Not a problem.** |
 | In progress | ◔ determinate arc | accent | "Updating · 40%" | shows progress, then settles |
-| Needs attention | ▲ | **Ember** | "2 updates", "Disk 91%" | rises within its section |
+| Needs attention | ▲ | **Ember** (amber) | "2 updates", "Disk 91%" | rises within its section |
 | Down / critical | ■ | red (desaturated in dark mode) | "Down since 14:02" | rises to the top of the page |
 | Stale / unknown | dashed outline + hatch | neutral | "Last seen 4m ago" | shows the last-known value, hatched |
 | Maintenance | ‖ | muted blue | "Maintenance until 22:00" | quiet; alerts silenced |
+
+**Validated status pairs** (from the dataviz palette validator, run in M0)
+- **Orange vs red failed in every theme:** normal-vision ΔE was 11–12.5, below the floor of 15, and colorblind separation was as low as 7.9.
+- **Amber vs crimson passes.** The colorblind ΔE is the worst case of deutan and tritan:
+
+| Theme | Attention (Ember) | Down | Colorblind ΔE | Normal-vision ΔE |
+|---|---|---|---|---|
+| A dark | `oklch(.74 .15 75)` | `oklch(.64 .21 15)` | 12.2 | 21.2 |
+| A light | `oklch(.66 .15 70)` | `oklch(.55 .21 15)` | 12.6 | 20.3 |
+| B light | `oklch(.64 .14 72)` | `oklch(.53 .2 18)` | 11.7 | 19.4 |
+| B dark | `oklch(.74 .14 78)` | `oklch(.64 .2 18)` | 11.4 | 20.3 |
+
+The dark-theme pairs sit above the validator's *categorical* lightness band. That's deliberate: these are status colors, which always come with a glyph and a word, not chart series.
 
 **Modes**
 - Light, Dark, **OLED black** (for kiosks), and **Night** (monochrome red, StandBy-style).
@@ -84,6 +99,11 @@ All fonts are open-source, self-hosted and bundled in the binary. Nothing loads 
 | UI sans | **Instrument Sans** · Inter · IBM Plex Sans | Instrument Sans fits the concept and is less ubiquitous than Inter. Plex has the most industrial character. |
 | Numerals / mono | **Geist Mono** · JetBrains Mono · Commit Mono | Used for *every* live value. Tabular, with a clear slashed zero. |
 | Display accent (optional) | Departure Mono (pixel) | Only for wall clocks and kiosk hero numbers. Our equivalent of Nothing's Ndot. |
+
+**Pairings in prototype v1:**
+- **A:** Instrument Sans (UI), Geist Mono (every value), and **Doto**, a dot-matrix face, for the clock only.
+- **B:** **Newsreader** (serif, with optical sizes) for the headline and section heads, and **Schibsted Grotesk**, a grotesk designed for news publishing, for UI and figures. Big standalone numbers use proportional figures; lists use tabular figures.
+- The prototype loads these from Google Fonts for convenience. The product bundles them.
 
 **Number formatting rules**
 - Tabular figures everywhere.
