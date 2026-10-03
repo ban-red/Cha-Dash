@@ -1,0 +1,350 @@
+# 04 · Roadmap, Decisions & Risks
+
+> Milestones are defined by what they achieve and how we know they're done, not by dates. Each one ends with a **demo moment**: the thing we post on r/selfhosted.
+> **Dogfood rule:** every milestone has to work on the [owner's real homelab](05-dogfood-home.md) before it ships.
+
+---
+
+## Decisions
+
+### Decided ✅
+
+| # | Decision | Outcome | Notes |
+|---|---|---|---|
+| 1 | **Name** | **Cha Dash** · domain `dash.cha.sh` | Slugs: `chadash` (hub), `chadash-node` (node). Docker labels: `chadash.*`. Env prefix: `CHADASH_*` |
+| 2 | **License** | **AGPL-3.0-or-later** for hub and node. Apache-2.0 for the spec schema, design tokens and icon pipeline | **Contribution terms (DCO or CLA) are still to be decided, before the first outside PR is merged.** That choice decides whether the license can be changed later (for example, a friendlier license for institutions) |
+| 3 | **Frontend** | **Vue 3.6** (RC now, stable when released) + **latest Vite**, as a plain SPA embedded in the Go binary | Vapor mode opt-in per component, adopted only where measurements show a gain. See [03 · Architecture → Tech stack](03-architecture.md#tech-stack) |
+| 4 | **Dogfood** | The owner's homelab | See [05 · Dogfood home](05-dogfood-home.md). It sets the v0.1 integration list |
+| 5 | **How much "home" in v0.1** | Infrastructure first, plus the home integrations the owner actually uses: **Home Assistant, Frigate, media calendar, clock/weather**. The Family board ships in v0.2; feeds in v1.0 | — |
+| 6 | **Stacks** | **Cha Dash owns them.** Files live on disk on their host, in a git-versioned stacks root. Adopt and import are first-class. A **thin node** runs on each Docker server | The node is the only component that ever writes to Docker. The hub stays unprivileged |
+| 7 | **Self-hosting** | **Docker Compose is the main install method.** Plain `docker compose up -d` with zero required env vars; nodes are added with a compose snippet too | Unraid CA, binaries, TrueNAS and Helm are secondary channels |
+| 8 | **Repo and images** | **[github.com/ban-red/Cha-Dash](https://github.com/ban-red/Cha-Dash)** (public). Images: `ghcr.io/ban-red/chadash` and `ghcr.io/ban-red/chadash-node` | Unraid CA blacklists repos that get renamed or transferred. **Any move to an org has to happen before the first CA submission**, or not at all |
+| 9 | **Default port** | **3696** (hub HTTP and the node WebSocket endpoint `/node`) | Avoids the ports other self-hosted dashboards commonly default to (3000, 7575, 8080) |
+| 10 | **Unraid** | **Unraid stays Unraid.** Containers stay Unraid-managed and are controlled through the Unraid API; nothing is converted to compose. An **optional thin node on Unraid** (v0.3+) adds metrics, logs, SMART and update checks alongside the API | Owned stacks target compose hosts such as pvedocker |
+| 11 | **Mobile** | **The PWA is the mobile client.** It's served by the compose-hosted hub; no native app for now | Home Screen install, Web Push and passkey approvals cover the phone |
+
+### Still open
+
+| # | Decision | Options | Recommendation | When |
+|---|---|---|---|---|
+| 12 | **Visual direction** | A Instrument · B Paper · blend | Prototype both; expect A's structure with B's warmth for the light theme | M0 design spike |
+| 13 | **Grid engine** | Build our own · gridstack 14 · dnd-kit/dom | **Build** (TS package + Vue/Motion renderer), after a one-day comparison spike | M0 |
+| 14 | **Node transport and identity** | mTLS · Noise | mTLS with a pinned self-signed CA, unless the spike shows Noise is better | Before v0.2 (the local node) |
+| 15 | **SQLite driver** | modernc · ncruces (encryption at rest) | Spike both; prefer ncruces if encryption is cheap | M0 |
+| 16 | **Hardware floor** | arm64 · armv7 | Fully support amd64 and arm64; armv7 best-effort | M0 |
+| 17 | **AI/MCP stance** | Embrace post-1.0, with approvals · avoid | Embrace, but only through the action engine with human approval. Design the "propose" API now | Before v0.2 |
+
+---
+
+## Milestones at a glance
+
+| Milestone | Theme | Outcome |
+|---|---|---|
+| **M0** | Foundations | Open decisions settled, design direction picked, the layout engine feels right, Demo Home running |
+| **v0.1** | Front Page | A beautiful, live, read-only front page that **replaces the owner's Homepage** |
+| **v0.2** | Control | Safe actions on Docker, Proxmox and Unraid; **a local node and owned stacks on the hub's host**; audit, roles, notifications |
+| **v0.3** | Fleet | **Remote nodes on every Docker server**; stacks fleet-wide; history, the Atlas, cause hints |
+| **v0.4** | Care | Update Center with safe rollouts, backup assurance, incident timeline |
+| **v1.0** | Home | Public declarative integrations, TrueNAS, wall and TV modes, i18n, security review, stable config and API |
+| **Post-1.0** | Beyond | WASM plugins, MCP with approvals, multi-site, GitOps |
+
+---
+
+## M0: Foundations
+
+**Decisions:** settle 12–16 in the table above, each written up as an ADR in `docs/adr/`.
+
+**Design spike**
+- Build static prototypes of **Direction A (Instrument)** and **Direction B (Paper)**, both rendering the **dogfood home's real shape** with sample values.
+- Each prototype shows:
+  - the front page, healthy and with today's real incidents (PBS, Plex, Karakeep)
+  - one widget in all 7 sizes, in every state
+  - the phone layout
+  - the wall and night modes
+- Pick one direction and produce token v0: color scales, type, spacing, motion.
+
+**Layout engine spike:** `packages/layout` (pure TS) plus a Vue 3.6 renderer using Motion for Vue. It must prove:
+- drag with momentum projection
+- snapping only to supported sizes
+- sections that reflow in Z-order
+- a phone layout derived automatically
+- keyboard editing
+- undo
+- 60 fps on a mid-range phone
+
+Compare it for one day against a gridstack 14 prototype.
+
+**Plumbing spikes**
+- Multiple PVE instances plus a cluster: privilege-separated token reads of `/cluster/resources`.
+- Unraid GraphQL subscriptions and the `ApiKeyAuthorize` consent flow.
+- Docker reads through a socket proxy (local and remote TCP).
+- Traefik API router discovery, including path-based routers.
+- OPNsense SSE traffic stream.
+- Frigate events and snapshots.
+- **Compose SDK + go-git** in a node prototype: deploy, diff, roll back.
+- One multiplexed WebSocket carrying a snapshot followed by diffs.
+
+**Repo and process**
+- Skeleton, `deploy/compose.yaml`.
+- CI: lint, test, govulncheck, bundle budget.
+- Contribution-terms bot (DCO or CLA, per decision 2), CODEOWNERS, contributor guide v1.
+
+**Demo Home simulator v0**, seeded from the dogfood home's shape, with its real incidents scripted.
+
+**Done when:** a clickable prototype on Demo Home feels right on desktop and phone, and all ADRs are written.
+
+**Demo moment:** a 20-second recording of editing the layout while the PBS incident rises to the top.
+
+---
+
+## v0.1: Front Page (read-only, beautiful, live)
+
+**Platform**
+- **Install with `docker compose up -d`**: hub plus an optional read-only socket-proxy sidecar.
+- First run: setup token → owner account → passkey.
+- SQLite and vault; WebSocket updates with the snapshot inlined into the first paint.
+- Unraid CA template and binaries as secondary channels.
+
+**Experience**
+- Boards and sections; edit in place plus edit mode; layout history and undo.
+- **Status sentence**; a **Needs attention** section that appears automatically.
+- **Inbox**: discoveries and **repairs**.
+- ⌘K search and open.
+- Light, dark and OLED themes.
+- Installable PWA that shows last-known state when offline.
+
+**Widgets**
+- Service tile, with a live stat and context from the graph
+- **Fleet card** (multiple PVE instances + Unraid + Docker hosts), host card, guest list
+- Container list, Unraid array, storage bar
+- **Camera Hero** (Frigate) and HA summary
+- Media calendar, now playing, download queue
+- Uptime check, metric stat and sparkline
+- Bookmarks, clock and weather
+
+**Integrations (read):** the [dogfood set](05-dogfood-home.md#v01-integration-set-derived-from-this-home).
+- **Tier 0:**
+  - Infrastructure: Proxmox VE (multiple instances, clusters), PBS, Unraid, Docker via socket-proxy, Traefik, OPNsense, Uptime Kuma
+  - Home: Home Assistant, Frigate
+  - Media and downloads: Plex (PIN auth), Sonarr, Radarr, Prowlarr, qBittorrent
+  - Apps: Immich
+  - Built-in checks
+- **Internal specs:** Tautulli, Bazarr, Mealie, Linkding, Karakeep.
+- **Breadth:** Jellyfin, Pi-hole, AdGuard, SABnzbd.
+
+**Config**
+- YAML export and import with a diff preview.
+- **Homepage importer**, tested on the owner's real config.
+- Generator for least-privilege tokens (one per PVE instance).
+
+**Done when**
+- The **owner switches off their Homepage**.
+- A fresh install goes from `docker compose up -d` to a populated, live page in **under 3 minutes**, with no YAML written.
+- Performance budgets are met and WCAG AA checks pass.
+- 10 external beta users run it every day.
+
+**Demo moment:** "I pointed it at my 5 Proxmox boxes, my Unraid and Traefik, and it built this page by itself."
+
+---
+
+## v0.2: Control (plus owned stacks on the hub's host)
+
+**Engine and security**
+- Action engine: registry, tiers, scopes, undo, plan/approve/execute, per-resource locks.
+- **Audit log.**
+- Roles: Owner, Admin, Operator, Viewer, Household.
+- Step-up auth.
+- Scoped API tokens and a public OpenAPI.
+
+**Local node:** `chadash-node` runs in the **same compose file** as the hub and replaces the socket-proxy for that host. From here on, all Docker writes go through a node.
+
+**Owned stacks (on the hub's host)**
+- Git-versioned stacks root.
+- Compose editor with validation and a diff against what's running.
+- Deploy pipeline: pull → up → health gate → commit, or roll back.
+- **Adopt existing compose projects in place.**
+
+**Actions**
+- **Docker:** start, stop, restart, recreate, pull, remove (T3), logs, opt-in exec.
+- **Proxmox:** guest power, snapshots, run vzdump now, live task progress. Works across all instances.
+- **Unraid:** Docker and VM power, container updates, parity, array (T3).
+- **Apps:** pause and resume qBittorrent, *arr searches, HA scripts, Pi-hole/AdGuard pause, Seerr approve.
+
+**Experience**
+- Safety ladder UI: undo, hold to confirm with a blast-radius preview (**"Reboot pluto takes down the router"**), typed confirmation.
+- ⌘K actions, **lenses**, and hub self-awareness.
+
+**Notifications:** symptom-first defaults; Web Push, ntfy, Apprise, webhook, email, HA.
+
+**People:** OIDC, forward-auth behind trusted proxies, **Family board**, kiosk tokens.
+
+**Done when**
+- Every action is audited, authorized centrally (tested in CI), and gets the correct tier UX.
+- The owner manages the hub host's stacks from Cha Dash, including one deliberately bad deploy that rolls back on its own.
+
+**Demo moment:** a hold-to-reboot ring warning that the whole network is about to go down.
+
+---
+
+## v0.3: Fleet (remote nodes everywhere)
+
+**Remote nodes**
+- Enrollment: "Add node" generates a compose snippet with a single-use token; keys are pinned; an admin approves in the Inbox.
+- A local policy file on each node.
+- Runs inside **Proxmox LXCs** such as pvedocker. It can also run **on Unraid** (CA template) as an optional companion to the Unraid API: metrics, logs, SMART and update checks. Unraid keeps managing its own containers.
+
+**Fleet stacks**
+- Owned stacks on every node.
+- **Move-into-root adoption** that keeps the project name.
+- Importers for **Dockge and Portainer**.
+- **Self-update** of Cha Dash via the hub host's node.
+
+**Graph v2**
+- Correlation across sources: Unraid, Docker, Traefik, apps.
+- Caddy and NPM discovery.
+- `depends_on` relations contributed by apps.
+- **Cause hints.**
+- The **Atlas** view.
+
+**History**
+- Host metrics from nodes, metric rollups, the **Pulse strip** with time travel, **linked scrubbing**.
+
+**Extras**
+- Logs streaming and exec through nodes.
+- Proxied Proxmox console.
+- TrueNAS community app listing.
+
+**Done when**
+- The dogfood home's Docker servers are all managed through nodes with **zero inbound ports**.
+- Cause hints are correct across the Demo Home incident suite.
+
+**Demo moment:** the Atlas view of the dogfood home, plus "Sonarr is failing *because* qBittorrent was OOM-killed."
+
+---
+
+## v0.4: Care
+
+**Update Center**
+- One list covering image digests (via nodes), Unraid, PVE apt, TrueNAS apps and node host packages.
+- Risk classification plus changelogs.
+- **Staged, dependency-ordered updates.** Each one takes a snapshot first (a PVE snapshot of pvedocker, or a git commit for stacks), runs a health gate, and rolls back automatically.
+- **Release radar.**
+
+**Backups**
+- Sources: PBS (including PBS running in a container), PVE not-backed-up, Backrest, Kopia, Duplicati, borg-ui, Zerobyte, Unraid flash.
+- **Coverage map**, freshness objectives, run now and verify now.
+
+**Operations**
+- Maintenance windows, **incident timeline**, the PVE notification webhook receiver, and a morning digest.
+
+**Done when**
+- "Update all" on the dogfood home survives a deliberately broken image.
+- Backup coverage is correct for every guest across all 5 PVE endpoints.
+
+**Demo moment:** "Sunday updates: 6 updated, 1 rolled back automatically, all while I made coffee."
+
+---
+
+## v1.0: Home
+
+- **Public declarative integration specs:** a community repo, the Workbench, a scaffolding CLI.
+- **More integrations:**
+  - TrueNAS
+  - Home Assistant both ways (Cha Dash entities and actions exposed to HA)
+  - UniFi, pfSense, Tailscale, Cloudflare Tunnel
+  - Gatus, Prometheus, NUT, Technitium, Synology (read)
+  - Feeds, iCal
+- **Contexts:** wall and kiosk mode (dimming, night tint, burn-in care, rotation), TV mode, and a simplified level of detail for every widget.
+- **Git:** sync for config, and a git remote for stacks.
+- **Quality:**
+  - i18n through Weblate
+  - docs site and a public demo running on the simulator
+  - **external security review** and a published threat model
+  - stability guarantees for the config schema, API and spec format
+- **Distribution:** Helm and Umbrel.
+
+**Done when**
+- There's a stable upgrade path from 0.x.
+- No P0/P1 security findings are open.
+- Every widget meets the 4-level detail spec.
+
+**Demo moment:** a wall tablet that has been calm for a week wakes up with one amber line, and the problem gets fixed from a phone.
+
+---
+
+## Post-1.0 candidates
+
+- WASM plugins
+- MCP server with approval flows
+- Multi-site support
+- Proxmox deploy (OCI image → LXC)
+- Power and cost tracking
+- Automation rules and scheduled actions
+- TRMNL / e-ink
+- Bring-your-own-LLM "Explain this"
+- Home Assistant add-on
+
+---
+
+## Integration priority (by milestone)
+
+| Milestone | Integrations |
+|---|---|
+| **v0.1** (dogfood, Tier 0) | Proxmox VE (multiple instances and clusters) · PBS · Unraid · Docker (socket-proxy) · Traefik · OPNsense · Home Assistant · Frigate · Plex · Sonarr · Radarr · Prowlarr · qBittorrent · Immich · Uptime Kuma · built-in checks |
+| **v0.1** (internal specs) | Tautulli · Bazarr · Mealie · Linkding · Karakeep |
+| **v0.1** (launch breadth) | Jellyfin · Pi-hole · AdGuard · SABnzbd |
+| **v0.2** | Seerr/Overseerr/Jellyseerr · Nextcloud · Transmission · NZBGet · Lidarr · Audiobookshelf · Paperless-ngx · Speedtest Tracker |
+| **v0.3** | Node host metrics · SMART · Caddy/NPM discovery · Glances/Beszel (as sources) · Dozzle deep links |
+| **v0.4** | WUD/Cup/Diun · Backrest · Kopia · Duplicati · borg-ui · Zerobyte · Scrutiny |
+| **v1.0** | TrueNAS · UniFi · pfSense · Tailscale · Cloudflare · Gatus · Prometheus · NUT · Technitium · Synology · feeds · iCal |
+
+---
+
+## Risks and mitigations
+
+| Risk | Likelihood | Impact | Mitigation |
+|---|---|---|---|
+| **"Why another dashboard?"** | High | High | Be clearly better where it matters: the unified graph, control depth across Proxmox and Unraid, owned stacks with git history and rollback, a ~30 MB single binary, design quality, safety UX. Don't chase widget-count parity. |
+| **Owning stacks means we can break production** | Medium | Critical | Plan and diff before every deploy, health gates, automatic rollback to the previous commit, preserved project names, protect-lists, audit. Dogfood every deploy path on the owner's lab first. |
+| **Integration upkeep overwhelms maintainers** | High | High | Capability contracts, versioned adapters, recorded fixtures for each version, CODEOWNERS, quality tiers, specs for the long tail. The Karakeep 404 on the dogfood page is exactly the failure to design for. |
+| **Security incident** (we hold the keys to the house) | Medium | Critical | Hub has no Docker write access; node local policy; no third-party JS; strict CSP; central authorization tests on hub and node; step-up auth; external review before 1.0. |
+| **Scope creep into rebuilding every platform's native UI** | High | High | Stick to the control line: handle the daily 80% natively and deep-link precisely for the rest. |
+| **Design quality slips as contributors add widgets** | Medium | High | Primitives and tokens, Workbench visual regression, a design review checklist, design CODEOWNERS. |
+| **Vue 3.6 RC churn / Vapor maturity** | Medium | Low | Pin versions; use standard (non-Vapor) components by default; keep the layout engine framework-agnostic; upgrade to stable once released. |
+| **Bus factor / burnout** | Medium | High | Keep docs and ADRs current; make contributing easy (specs, scaffolding, Workbench, fixtures); keep scope narrow. |
+| **Distrust of "vibe-coded" software** | Medium | Medium | Show the engineering rigor openly: tests, ADRs, threat model, signed releases, careful changelogs. |
+| **Upstream API churn** (TrueNAS 26, Jellyfin 12, Sonarr v5, Karakeep…) | Certain | Medium | Version detection, adapters, fixture CI, and Repairs that explain what broke. |
+| **Distribution gates** (Unraid CA rename blacklist; community-scripts needs 1k stars) | Medium | Medium | Lock the org/repo slug before submitting (decision 8). Lead with compose. |
+| **The hub's host goes down exactly when it's needed** (e.g. pluto, which hosts the router) | Medium | Medium | The PWA shows last-known state when offline; the hub warns before actions that affect itself; docs recommend running the hub on a host that doesn't also run the router. |
+
+---
+
+## Open questions
+
+None right now. The remaining open items are the M0 decisions (12–17) above.
+
+*Answered:*
+- **Homepage config** is now the [importer fixture](../../testdata/importers/homepage/dogfood/README.md).
+- **Container placement:** see [05 · Dogfood home](05-dogfood-home.md#hosts-and-platforms). Both Docker endpoints are socket-proxy containers, and Linkding and Karakeep run on pvedocker.
+- **Repo and port:** decisions 8 and 9.
+- **Unraid:** decision 10.
+- **Mobile:** decision 11.
+
+---
+
+## Immediate next steps
+
+1. ~~**Repo bootstrap**~~ ✅ done 2026-10-03: `LICENSE` (AGPL-3.0), `SECURITY.md`, `CONTRIBUTING.md`, docs and fixture pushed to [ban-red/Cha-Dash](https://github.com/ban-red/Cha-Dash). Still to do: enable private vulnerability reporting, and decide contribution terms (decision 2).
+2. **Design exploration:** Direction A and B prototypes rendering the dogfood home with today's real incidents.
+3. **Layout engine spike** (TS + Vue 3.6 + Motion for Vue), plus a one-day gridstack comparison.
+4. **Hub skeleton:**
+   - `chadash serve`, setup token, SQLite, WebSocket snapshot/diff
+   - `deploy/compose.yaml` with the socket-proxy preset
+   - Demo Home simulator v0
+5. **Plumbing spikes:**
+   - multiple PVE instances
+   - Unraid consent flow and subscriptions
+   - Traefik routers
+   - Docker reads through the socket proxy
+   - Compose SDK + go-git deploy and rollback
+6. Write ADR-0001 to ADR-0011 for the decided items, and ADR-0012 onward as the open ones are settled.

@@ -1,0 +1,27 @@
+# OS / editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# Local data & secrets — never commit
+/data/
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+# raw (unsanitized) fixture captures; only sanitized fixtures belong in testdata/
+*.raw.yaml
+*.raw.json
+
+# Build outputs
+/dist/
+/bin/
+node_modules/
+web/dist/
+coverage/
+
+# Private research notes (kept locally, not published)
+docs/research/

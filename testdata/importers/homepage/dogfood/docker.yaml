@@ -1,0 +1,14 @@
+---
+# SANITIZED FIXTURE — see README.md
+# For configuration options and examples, please see:
+# https://gethomepage.dev/latest/configs/docker/
+
+my-docker:
+  host: dockerproxy
+  port: 2375
+
+my-unraid:
+  host: 10.0.11.120
+  port: 2375
+# my-docker:
+#   socket: /var/run/docker.sock

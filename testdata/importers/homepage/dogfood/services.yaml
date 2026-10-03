@@ -1,0 +1,276 @@
+---
+# SANITIZED FIXTURE — derived from the dogfood home's real Homepage config (2026-10-03).
+# Structure, field names, comments and quirks are preserved; every secret is FAKE but shape-preserving,
+# domains are mapped to *.lab.example / *.family.example and LAN IPs to 10.0.11.x. See README.md.
+
+# Example of using docker compose labels directly
+    # labels:
+    #   # homepage
+    #   - homepage.group=Apps
+    #   - homepage.name=Mealie
+    #   - homepage.icon=mealie.png
+    #   - homepage.href=https://food.family.example
+    #   - homepage.widget.type=mealie
+    #   - homepage.widget.version=2
+    #   - homepage.widget.url=http://10.0.11.120:9925
+    #   - homepage.widget.key=eyJhbG
+
+- Home:
+  - HomeAssistant:
+      href: https://home.lab.example
+      icon: mdi-home-assistant
+      widget:
+        type: homeassistant
+        url: https://home.lab.example
+        key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJGQUtFLUZJWFRVUkUifQ.FAKE_SIGNATURE_FOR_TESTS_ONLY_00000000000
+        # custom:
+        #   - state: sensor.total_power
+        #   - state: sensor.total_energy_today
+        #     label: energy today
+        #   - template: "{{ states.switch|selectattr('state','equalto','on')|list|length }}"
+        #     label: switches on
+        #   - state: weather.forecast_home
+        #     label: wind speed
+        #     value: "{attributes.wind_speed} {attributes.wind_speed_unit}"
+  - Frigate:
+      icon: frigate.png
+      href: http://10.0.11.202:55000
+      widget:
+        type: frigate
+        url: http://10.0.11.202:55000
+        enableRecentEvents: true # Optional, defaults to false
+- Servers:
+  # For proxmox
+  # 1. Create Group: Datacenter > Permissions > Groups > Create (e.g., api-ro-users).
+  # 2. Group Permission: Permissions > Add > Group Permission (Path: /, Group: api-ro-users, Role: PVEAuditor, Propagate: Checked).
+  # 3. Create User: Permissions > Users > Add (e.g., api, Realm: Linux PAM, Group: api-ro-users).
+  # 4. Create API Token: Permissions > API Tokens > Add (User: api, Token ID: e.g., homepage, Privilege Separation: Checked).
+  # 5. API Token Permission: Permissions > Add > API Token Permission (Path: /, API Token: homepage, Role: PVEAuditor, Propagate: Checked).
+  # 6. Use api@pam!homepage as username and "Secret" as password.
+  - OPNSense:
+      href: https://opnsense.lab.example
+      icon: opnsense.png
+      widget:
+        type: opnsense
+        url: http://10.0.11.1
+        username: FAKEopnsenseKEY0000000000000000000000000000000000000000000000000000000000000000
+        password: FAKEopnsenseSECRET00000000000000000000000000000000000000000000000000000000000
+        # wan: opt1 # optional, defaults to wan
+  - ProxmoxPluto:
+      href: https://pluto.lan:8006
+      name: Pluto PVE (main opnsense)
+      icon: https://api.iconify.design/simple-icons:proxmox.svg?color=%23888888
+      widget:
+        type: proxmox
+        url: https://pluto.lan:8006
+        username: api@pam!homepage
+        password: 00000000-0000-4000-8000-000000000001
+        #node: pve-1 # optional
+  - ProxmoxMiniG5:
+      href: https://mini_g5.lan:8006/
+      name: MiniG5 PVE (homeassistant/frigate)
+      icon: https://api.iconify.design/simple-icons:proxmox.svg?color=%23888888
+      widget:
+        type: proxmox
+        url: https://mini_g5.lan:8006
+        username: api@pam!homepage
+        password: 00000000-0000-4000-8000-000000000002
+        #node: pve-1 # optional
+  - ProxmoxMarsCluster:
+      href: https://mars-1.lan:8006/
+      name: Mars PVE Cluster (pvedocker, 2 nodes)
+      icon: https://api.iconify.design/simple-icons:proxmox.svg?color=%23888888
+      widget:
+        type: proxmox
+        url: https://mars-1.lan:8006/
+        username: api@pam!homepage
+        password: 00000000-0000-4000-8000-000000000003
+        # node: mars-1 # optional, will default to average for cluster
+  - ProxmoxIO:
+      href: https://io.lan:8006/
+      name: IO PVE (windows gaming vm, iolinux ubuntu vm)
+      icon: https://api.iconify.design/simple-icons:proxmox.svg?color=%23888888
+      widget:
+        type: proxmox
+        url: https://io.lan:8006/
+        username: api@pam!homepage
+        password: 00000000-0000-4000-8000-000000000004
+        # node: mars-1 # optional, will default to average for cluster
+  # - ProxmoxMiniTitan: #gmktec mini pc
+  #     href: https://mini-titan.lan:8006/
+  #     name: Mini-Titan PVE (windows)
+  #     icon: data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciLz4=
+  #     widget:
+  #       type: proxmox
+  #       url: https://mini-titan.lan:8006
+  #       username: api@pam!homepage
+  #       password: 00000000-0000-4000-8000-000000000006
+  #       #node: pve-1 # optional
+  - Jupiter:
+      name: Jupiter Unraid
+      href: https://jupiter.lab.example/
+      icon: https://api.iconify.design/simple-icons:unraid.svg?color=%23888888
+      siteMonitor: http://10.0.11.120
+  - JupiterNas:
+      href: https://jupiter-nas.lan:8006/
+      name: JupiterNas PVE
+      icon: https://api.iconify.design/simple-icons:proxmox.svg?color=%23888888
+      widget:
+        type: proxmox
+        url: https://jupiter-nas.lan:8006
+        username: api@pam!homepage
+        password: 00000000-0000-4000-8000-000000000005
+        #node: pve-1 # optional
+  - JupiterNasCockpit:
+      href: https://jupiter-nas-debian.lan:9090/
+      icon: https://api.iconify.design/logos:cockpit.svg?color=%23888888
+      siteMonitor: https://jupiter-nas-debian.lan:9090/
+- Services:
+  - Traefik:
+      href: https://traefik.lab.example
+      icon: traefik.png
+      server: my-docker
+      container: traefik
+      widget:
+        type: traefik
+        url: http://traefik.lab.example
+        username: admin # optional
+        password: FAKE-REUSED-PASSWORD # optional  (fixture note: same value as qBittorrent, as in the original)
+  - UptimeKuma:
+      icon: uptime-kuma.png
+      href: https://uptime.lab.example
+      server: my-docker
+      container: uptimekuma
+      widget:
+        type: uptimekuma
+        url: https://uptime.lab.example
+        slug: current
+        key: uk2_FAKE00000000000000000000000000000000000
+
+- Media:
+  - Plex:
+      id: 100
+      icon: plex.png
+      href: https://plex.lab.example
+      server: my-unraid
+      container: Plex-Current
+      widget:
+        type: plex
+        fields: ["streams", "movies", "tv"]
+        url: https://plex.lab.example
+        key: FAKEplexTOKEN0000000
+  - Radarr:
+      icon: radarr.png
+      href: https://jupiter.lab.example/radarr
+      server: my-unraid
+      container: radarr
+      widget:
+        type: radarr
+        fields: ["wanted", "queued"]
+        url: https://jupiter.lab.example/radarr
+        key: 00000000000000000000000000000001
+  - Sonarr:
+      icon: sonarr.png
+      href: https://jupiter.lab.example/sonarr
+      server: my-unraid
+      container: sonarr
+      widget:
+        type: sonarr
+        fields: ["wanted", "queued"]
+        url: https://jupiter.lab.example/sonarr
+        key: 00000000000000000000000000000002
+  # - Overseer:
+  #     icon: overseerr.png
+  #     href:
+  #     container: overseerr
+  #     widget:
+  #       type: overseerr
+  #       url:
+  #       key: #api-key
+  - Bazarr:
+      icon: bazarr.png
+      href: https://jupiter.lab.example/bazarr
+      server: my-unraid
+      container: bazarr
+      widget:
+        type: bazarr
+        url: https://jupiter.lab.example/bazarr
+        key: 00000000000000000000000000000003
+- Data:
+  - "":
+      widget:
+        type: calendar
+        firstDayInWeek: sunday # optional - defaults to monday
+        view: monthly # optional - possible values monthly, agenda
+        maxEvents: 10 # optional - defaults to 10
+        showTime: true # optional - show time for event happening today - defaults to false
+        integrations: # optional
+          - type: sonarr
+            service_group: Media # group name where widget exists
+            service_name: Sonarr # service name for that widget
+            color: teal # optional - defaults to pre-defined color for the service (teal for sonarr)
+            params: # optional - additional params for the service
+              unmonitored: true # optional - defaults to false, used with *arr stack
+          - type: radarr
+            service_group: Media # group name where widget exists
+            service_name: Radarr # service name for that widget
+            color: # optional - defaults to pre-defined color for the service (teal for sonarr)
+            params: # optional
+              unmonitored: true
+  - Tautulli:
+      icon: tautulli
+      href: https://jupiter.lab.example/tautulli
+      server: my-unraid
+      container: tautulli
+      widget:
+        type: tautulli
+        url: https://jupiter.lab.example/tautulli
+        key: FAKEtautulliKEY00000000000000000
+
+- Archive/Backup:
+  # - Linkwarden:
+  #     widget:
+  #       type: linkwarden
+  #       url: http://10.0.11.201:9190
+  #       key: FAKElinkwarden000000
+
+  - Linkding:
+      icon: linkding.png
+      href: https://links.lab.example
+      description: Shared bookmarks
+  - Hoarder/Karakeep:
+      icon: karakeep.png
+      href: https://hoarder.lab.example
+      description: Long term archived bookmarks/websites
+      widget:
+        type: karakeep
+        url: https://hoarder.lab.example
+        key: ak1_00000000000000000000_0000000000000000000000
+- Downloads:
+  - qBittorrent:
+      icon: qbittorrent.png
+      href: https://torrents.lab.example
+      container: binhex-qbittorrentvpn
+      server: my-unraid
+      widget:
+        type: qbittorrent
+        url: https://torrents.lab.example
+        username: admin
+        password: FAKE-REUSED-PASSWORD
+  # - NZBget:
+  #     href:
+  #     container: binhex-nzbget
+  #     widget:
+  #       type: nzbget
+  #       url:
+  #       username: #username
+  #       password: #password
+  - Prowlarr:
+      icon: prowlarr
+      href: https://jupiter.lab.example/prowlarr
+      server: my-unraid
+      container: binhex-prowlarr
+      widget:
+        type: prowlarr
+        url: https://jupiter.lab.example/prowlarr
+        key: 00000000000000000000000000000004

@@ -1,0 +1,58 @@
+---
+# SANITIZED FIXTURE — see README.md
+# For configuration options and examples, please see:
+# https://gethomepage.dev/latest/configs/settings
+
+providers:
+  openweathermap: openweathermapapikey
+  weatherapi: weatherapiapikey
+
+title: Alpaca Homepage
+instanceName: pvedocker
+
+background:
+  image: https://images.pexels.com/photos/1624496/pexels-photo-1624496.jpeg
+  blur:  sm # sm, "", md, xl... see https://tailwindcss.com/docs/backdrop-blur
+  saturate: 40 # 0, 50, 100... see https://tailwindcss.com/docs/backdrop-saturate
+  brightness: 50 # 0, 50, 75... see https://tailwindcss.com/docs/backdrop-brightness
+  opacity: 50 # 0-100
+
+layout:
+  Home:
+    style: row
+    columns: 4
+  Servers:
+    style: row
+    columns: 4
+  Services:
+    style: row
+    columns: 5
+  Media:
+    style: row
+    columns: 5
+  Data:
+    style: row
+    columns: 2
+    header: false
+  Apps:
+    style: row
+    columns: 4
+  "Archive/Backup":
+    style: row
+    columns: 4
+  Downloads:
+    style: row
+    columns: 4
+
+quicklaunch:
+  searchDescriptions: true
+  hideInternetSearch: true
+  hideVisitURL: true
+
+hideVersion: false
+
+useEqualHeights: true
+color: slate
+statusStyle: "dot"
+disableCollapse: true
+headerStyle: boxedWidgets
